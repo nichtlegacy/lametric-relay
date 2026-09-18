@@ -1,0 +1,146 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: python-3.12
+    env:
+      PIP_ROOT_USER_ACTION: ignore
+      LAMETRIC_KEY: test
+    steps:
+      - name: Install build tools
+        run: |
+          apt-get update
+          apt-get install -y ca-certificates curl docker.io docker-compose git gnupg imagemagick
+          install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
+            | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+          echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" \
+            > /etc/apt/sources.list.d/nodesource.list
+          apt-get update
+          apt-get install -y nodejs
+          python -m pip install --upgrade pip
+
+      - name: Check out repository
+        uses: https://data.forgejo.org/actions/checkout@v4
+
+      - name: Fetch icons
+        # Not stored in the repo: they come from the LaMetric community library.
+        # Without them, tests would use icon paths that do not exist.
+        run: |
+          python scripts/fetch-icons.py
+          python scripts/fetch-icons.py --check
+
+      - name: Compile Python sources
+        run: python -m compileall hub.py lametric.py quota.py names.py version.py addins scripts tests
+
+      - name: Run tests
+        run: |
+          for suite in tests/test_*.py; do
+            echo "--- $suite"
+            python "$suite"
+          done
+
+      - name: Load add-ins
+        run: python hub.py --list > /tmp/addins.txt && cat /tmp/addins.txt
+      - name: Verify add-ins without configuration
+        run: |
+          for name in forgejo kuma plex psn say; do
+            grep -q "^$name " /tmp/addins.txt
+          done
+          # codex needs Codex-LB and claude needs an ai-usage-insights database.
+          # Without those settings, the hub must not load them.
+          for name in codex claude clockface; do
+            if grep -q "^$name " /tmp/addins.txt; then
+              echo "$name was loaded without configuration"
+              exit 1
+            fi
+          done
+
+      - name: Verify icon tools
+        run: |
+          printf '...##...\n...##...\n' | python scripts/pixelart.py /tmp/probe.png '#D97757'
+          python scripts/icon.py --preview /tmp/probe.png >/dev/null
+
+      - name: Build production image
+        run: docker build -t lametric:ci .
+
+      - name: Verify production image
+        run: |
+          # Capture the full output before checking it. A `| grep -q` exits on the
+          # first match, closes the pipe, and makes `docker run` fail with "broken
+          # pipe" depending on timing.
+          docker run --rm -e LAMETRIC_KEY=test lametric:ci ./hub.py --list > /tmp/image-addins.txt
+          for name in forgejo kuma plex psn say; do
+            grep -q "^$name " /tmp/image-addins.txt
+          done
+          docker run --rm --entrypoint python lametric:ci \
+            -c "import hub, quota; assert quota.crossed(60, 24) == 25; print('logic ok')" \
+            > /tmp/image-logic.txt
+          grep -Fxq "logic ok" /tmp/image-logic.txt
+
+      - name: Render Compose file
+        run: LAMETRIC_HOST=127.0.0.1 LAMETRIC_KEY=dummy docker-compose -f compose.yaml config >/tmp/compose.rendered.yml
+
+  publish:
+    if: forgejo.event_name == 'push' && forgejo.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: python-3.12
+    steps:
+      - name: Install build tools
+        run: |
+          apt-get update
+          apt-get install -y ca-certificates curl docker.io git gnupg
+          install -d -m 0755 /etc/apt/keyrings
+          curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
+            | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+          echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" \
+            > /etc/apt/sources.list.d/nodesource.list
+          apt-get update
+          apt-get install -y nodejs
+
+      - name: Check out repository
+        uses: https://data.forgejo.org/actions/checkout@v4
+
+      - name: Build production image
+        run: |
+          docker build \
+            --label "org.opencontainers.image.revision=$FORGEJO_SHA" \
+            -t lametric:ci \
+            .
+
+      - name: Prepare image metadata
+        run: |
+          REGISTRY_HOST="${{ vars.REGISTRY_HOST }}"
+          test -n "$REGISTRY_HOST"
+          SHORT_SHA=$(printf '%s' "$FORGEJO_SHA" | cut -c1-12)
+          {
+            echo "REGISTRY_HOST=$REGISTRY_HOST"
+            echo "IMAGE_NAME=$REGISTRY_HOST/$FORGEJO_REPOSITORY"
+            echo "IMAGE_TAG_PROD=prod"
+            echo "IMAGE_TAG_SHA=sha-$SHORT_SHA"
+          } >> "$FORGEJO_ENV"
+
+      - name: Verify Docker availability
+        run: docker version
+
+      - name: Log in to Forgejo registry
+        run: |
+          printf '%s' "${{ secrets.REGISTRY_TOKEN }}" \
+            | docker login "$REGISTRY_HOST" -u "${{ forgejo.actor }}" --password-stdin
+
+      - name: Tag production image
+        run: |
+          docker tag lametric:ci "$IMAGE_NAME:$IMAGE_TAG_PROD"
+          docker tag lametric:ci "$IMAGE_NAME:$IMAGE_TAG_SHA"
+
+      - name: Push Docker image
+        run: |
+          docker push "$IMAGE_NAME:$IMAGE_TAG_PROD"
+          docker push "$IMAGE_NAME:$IMAGE_TAG_SHA"

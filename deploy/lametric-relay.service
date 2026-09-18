@@ -1,0 +1,15 @@
+[Unit]
+Description=LaMetric Relay
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/lametric-relay
+EnvironmentFile=%h/lametric-relay/.env
+ExecStart=/usr/bin/python3 %h/lametric-relay/hub.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

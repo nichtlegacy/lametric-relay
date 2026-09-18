@@ -1,0 +1,45 @@
+services:
+  lametric:
+    # GitHub Actions publishes this image after a successful build on main.
+    # Keep `build` alongside it so `docker compose up --build` can test local changes
+    # without pushing first.
+    image: ghcr.io/nichtlegacy/lametric-relay:latest
+    build: .
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+    ports:
+      - "8099:8099"        # Webhooks: Tautulli, Forgejo
+    environment:
+      LAMETRIC_HOST: ${LAMETRIC_HOST:?set in .env}
+      LAMETRIC_KEY: ${LAMETRIC_KEY:?set in .env}
+      # Optional: without these values, the hub skips the corresponding source.
+      CODEX_LB_URL: ${CODEX_LB_URL:-}
+      CODEX_LB_PASSWORD: ${CODEX_LB_PASSWORD:-}
+      # Fixed path inside the container. If AIUSAGE_DIR is unset, the project
+      # directory is mounted; it has no such database, so the claude add-in disables itself.
+      AIUSAGE_DB: /aiusage/.ai-usage-delivery.sqlite3
+      PLEX_WATCHER: ${PLEX_WATCHER:-}
+      CLOCKFACE: ${CLOCKFACE:-0}
+      # Empty means the clock is never muted; set a schedule in .env.
+      QUIET_HOURS: ${QUIET_HOURS:-}
+      QUIET_ALLOW_CRITICAL: ${QUIET_ALLOW_CRITICAL:-0}
+      OVERRIDE_SCREENSAVER: ${OVERRIDE_SCREENSAVER:-1}
+      # Quiet hours are local time; the image itself runs on UTC.
+      TZ: ${TZ:-UTC}
+      STATE_FILE: /state/state.json
+    volumes:
+      # Optional, for the claude add-in only. Read-only. The -wal/-shm files must be
+      # visible too, or SQLite cannot open the WAL database; mount the whole directory.
+      # An absolute path is required: Compose does not expand tildes in volume paths.
+      - ${AIUSAGE_DIR:-.}:/aiusage:ro
+      # Mount display names at runtime instead of baking them into the image. The file
+      # is not versioned; create it from assets/user_mapping.example.json.
+      - ${USER_MAPPING_FILE:-./assets/user_mapping.json}:/app/assets/user_mapping.json:ro
+      - lametric-state:/state
+
+volumes:
+  lametric-state:

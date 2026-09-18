@@ -1,0 +1,17 @@
+# Real names do not belong in the image. Mount this private file at runtime so local
+# and CI builds contain the same public files.
+assets/user_mapping.json
+
+.env
+.git
+state.json
+__pycache__/
+tests/
+
+# The preview site, its build output and the README media. None of it reaches
+# the runtime image, and all of it would be uploaded to the daemon every build.
+site/
+docs/
+artwork/
+_site/
+.icon-cache/

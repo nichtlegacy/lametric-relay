@@ -1,0 +1,13 @@
+{
+    "plex": {
+        "SomePlexLogin": "LEGACY",
+        "another.user": "GUEST"
+    },
+    "jellyfin": {
+        "SomeJellyfinLogin": "LEGACY"
+    },
+    "psn": {
+        "some_psn_id": "LEGACY",
+        "another_psn_id": "GUEST"
+    }
+}

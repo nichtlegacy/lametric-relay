@@ -1,0 +1,844 @@
+/* The only colour on this page comes out of the clock. Everything around it is
+   neutral in both themes, so an 8x8 icon stays the brightest thing on screen. */
+
+:root {
+  --bg: #ffffff;
+  --panel: #fafafa;
+  --panel-2: #f4f4f4;
+  --fg: #0a0a0a;
+  --fg-2: #575757;
+  --fg-3: #8f8f8f;
+  --line: #ebebeb;
+  --line-strong: #dcdcdc;
+
+  --screen: #0b0b0c;
+  --screen-off: #17171a;
+  --bezel-a: #1c1c1f;
+  --bezel-b: #0b0b0c;
+  --bezel-ring: rgb(0 0 0 / 0.1);
+
+  --warn: #92610a;
+  --warn-bg: #fdf4e3;
+  --warn-line: #f2e2c2;
+  --crit: #a3231b;
+  --crit-bg: #fdf0ef;
+  --crit-line: #f5d6d3;
+
+  --header-bg: rgb(255 255 255 / 0.86);
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.14);
+  --shadow-2: 0 8px 24px -12px rgb(0 0 0 / 0.3);
+
+  --r-card: 14px;
+  --r-item: 10px;
+  --r-chip: 8px;
+
+  /* One curve for the whole page. Everything here is a state change, never an
+     entrance, so it is an ease-out and it is short. */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* Dark is not the light palette inverted. Borders carry less contrast than they
+   would if flipped, surfaces lift instead of darken, and the screen goes to true
+   black so the device still reads as a lit object against a dark page. */
+:root[data-theme="dark"] {
+  --bg: #0a0a0a;
+  --panel: #131313;
+  --panel-2: #191919;
+  --fg: #ededed;
+  --fg-2: #a6a6a6;
+  --fg-3: #6f6f6f;
+  --line: #212121;
+  --line-strong: #2e2e2e;
+
+  --screen: #000000;
+  --screen-off: #111114;
+  --bezel-a: #232326;
+  --bezel-b: #0d0d0f;
+  --bezel-ring: rgb(255 255 255 / 0.1);
+
+  --warn: #e3b341;
+  --warn-bg: rgb(227 179 65 / 0.1);
+  --warn-line: rgb(227 179 65 / 0.24);
+  --crit: #f0776c;
+  --crit-bg: rgb(240 119 108 / 0.1);
+  --crit-line: rgb(240 119 108 / 0.24);
+
+  --header-bg: rgb(10 10 10 / 0.82);
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.5);
+  --shadow-2: 0 10px 30px -14px rgb(0 0 0 / 0.9);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a0a0a;
+    --panel: #131313;
+    --panel-2: #191919;
+    --fg: #ededed;
+    --fg-2: #a6a6a6;
+    --fg-3: #6f6f6f;
+    --line: #212121;
+    --line-strong: #2e2e2e;
+
+    --screen: #000000;
+    --screen-off: #111114;
+    --bezel-a: #232326;
+    --bezel-b: #0d0d0f;
+    --bezel-ring: rgb(255 255 255 / 0.1);
+
+    --warn: #e3b341;
+    --warn-bg: rgb(227 179 65 / 0.1);
+    --warn-line: rgb(227 179 65 / 0.24);
+    --crit: #f0776c;
+    --crit-bg: rgb(240 119 108 / 0.1);
+    --crit-line: rgb(240 119 108 / 0.24);
+
+    --header-bg: rgb(10 10 10 / 0.82);
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 0.5);
+    --shadow-2: 0 10px 30px -14px rgb(0 0 0 / 0.9);
+  }
+}
+
+* { box-sizing: border-box; }
+
+/* A plain `display: flex` on .chips or .composer outranks the user agent's
+   [hidden] rule, so the attribute has to win explicitly. */
+[hidden] { display: none !important; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 200ms var(--ease), color 200ms var(--ease);
+}
+
+h1, h2 { font-weight: 560; letter-spacing: -0.018em; margin: 0; }
+p { margin: 0; }
+a { color: inherit; }
+
+.wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+.muted { color: var(--fg-3); }
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* --- Header ------------------------------------------------------------- */
+
+.top {
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--header-bg);
+  backdrop-filter: saturate(180%) blur(12px);
+}
+
+.top-inner {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  font-size: 14px;
+}
+
+.mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 560;
+  letter-spacing: -0.01em;
+}
+
+/* The mark is the display itself, kept large enough for its LED rhythm to read. */
+.logo { flex: none; display: block; width: 60px; height: auto; }
+.top-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+/* --- Buttons ------------------------------------------------------------ */
+
+.gh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 11px;
+  font-size: 13px;
+  color: var(--fg-2);
+  text-decoration: none;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-chip);
+  transition: background-color 150ms var(--ease), color 150ms var(--ease),
+              border-color 150ms var(--ease), transform 160ms ease-out;
+}
+
+.gh-btn:active { transform: scale(0.96); }
+.gh-btn:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+/* The mark carries the weight of the label next to it. */
+.gh-btn svg { flex: none; }
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--fg-2);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-chip);
+  cursor: pointer;
+  transition: background-color 150ms var(--ease), color 150ms var(--ease),
+              border-color 150ms var(--ease), transform 160ms ease-out;
+}
+
+.icon-btn:active { transform: scale(0.96); }
+.icon-btn:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .gh-btn:hover, .icon-btn:hover { background: var(--panel); color: var(--fg); }
+}
+
+/* Both icons stay in the DOM and cross-fade, so the swap has an exit as well as
+   an enter without a motion library. */
+.swap { position: relative; display: block; width: 16px; height: 16px; }
+
+.swap .ico {
+  position: absolute;
+  inset: 0;
+  transition: opacity 200ms var(--ease), scale 200ms var(--ease), filter 200ms var(--ease);
+}
+
+.ico-sun { opacity: 0; scale: 0.25; filter: blur(4px); }
+.ico-moon { opacity: 1; scale: 1; filter: blur(0); }
+
+:root[data-theme="dark"] .ico-sun { opacity: 1; scale: 1; filter: blur(0); }
+:root[data-theme="dark"] .ico-moon { opacity: 0; scale: 0.25; filter: blur(4px); }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ico-sun { opacity: 1; scale: 1; filter: blur(0); }
+  :root:not([data-theme="light"]) .ico-moon { opacity: 0; scale: 0.25; filter: blur(4px); }
+}
+
+/* --- Intro -------------------------------------------------------------- */
+
+.intro { padding: 72px 0 40px; max-width: 620px; }
+.intro h1 { font-size: 32px; line-height: 1.2; }
+.intro p { margin-top: 14px; color: var(--fg-2); }
+
+/* --- Stage -------------------------------------------------------------- */
+
+.stage { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+/* Concentric: the bezel padding (10px) plus the screen radius (6px) is the
+   outer radius, so the two curves stay parallel. */
+.device {
+  position: relative;
+  width: 100%;
+  padding: 10px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--bezel-a), var(--bezel-b));
+  box-shadow:
+    var(--shadow-1),
+    var(--shadow-2),
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 0 0 1px var(--bezel-ring);
+  transition: box-shadow 200ms var(--ease), background 200ms var(--ease);
+}
+
+#screen {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  background: var(--screen);
+}
+
+/* Every reserved height below exists for one reason: picking a scenario must
+   never move the thing you are about to click next. */
+.readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+/* Two lines, because the quiet-hours message needs them and the route hint
+   does not. */
+.status { min-height: 44px; }
+
+.readout-main { display: flex; align-items: center; gap: 8px; }
+
+.badge {
+  font-size: 12px;
+  line-height: 20px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--fg-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.badge[data-level="warning"] { background: var(--warn-bg); border-color: var(--warn-line); color: var(--warn); }
+.badge[data-level="critical"] { background: var(--crit-bg); border-color: var(--crit-line); color: var(--crit); }
+
+.status { font-size: 14px; color: var(--fg-2); max-width: 46ch; }
+.status[data-muted="true"] { color: var(--crit); }
+
+/* --- Policy toggles ----------------------------------------------------- */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  justify-content: center;
+  align-items: center;
+}
+
+.policy, .transport { display: flex; gap: 8px; align-items: center; }
+
+.step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  color: var(--fg-2);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-item);
+  cursor: pointer;
+  transition: background-color 150ms var(--ease), color 150ms var(--ease),
+              transform 160ms ease-out;
+}
+
+.step:active { transform: scale(0.96); }
+.step:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .step:hover { background: var(--panel); color: var(--fg); }
+}
+
+/* Reserved for the widest case (two frames) so the row never reflows. */
+.dots { display: inline-flex; gap: 5px; min-width: 19px; }
+
+.dot-frame {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line-strong);
+  transition: background-color 150ms var(--ease);
+}
+
+.dot-frame[data-on] { background: var(--fg); }
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--fg-2);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-item);
+  cursor: pointer;
+  transition: background-color 150ms var(--ease), color 150ms var(--ease),
+              border-color 150ms var(--ease), transform 160ms ease-out;
+}
+
+.toggle .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line-strong);
+  transition: background-color 150ms var(--ease);
+}
+
+.toggle[aria-pressed="true"] { color: var(--fg); border-color: var(--fg); }
+.toggle[aria-pressed="true"] .dot { background: var(--fg); }
+.toggle:active:not(:disabled) { transform: scale(0.96); }
+.toggle:disabled { opacity: 0.45; cursor: not-allowed; }
+.toggle:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .toggle:hover:not(:disabled) { background: var(--panel); }
+}
+
+/* --- Picker ------------------------------------------------------------- */
+
+/* Everything selectable sits directly under the display: picking a scenario
+   should never scroll the thing it changes out of view. */
+.picker { padding: 44px 0 0; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+
+.segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 100%;
+  padding: 3px;
+  gap: 2px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-item);
+}
+
+.seg {
+  font: inherit;
+  font-size: 13px;
+  height: 28px;
+  padding: 0 12px;
+  color: var(--fg-2);
+  background: transparent;
+  border: 0;
+  border-radius: 7px;      /* 10px outer - 3px padding */
+  cursor: pointer;
+  transition: background-color 150ms var(--ease), color 150ms var(--ease),
+              box-shadow 150ms var(--ease);
+}
+
+.seg[aria-selected="true"] {
+  color: var(--fg);
+  background: var(--bg);
+  box-shadow: var(--shadow-1);
+}
+
+.seg:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .seg:not([aria-selected="true"]):hover { color: var(--fg); }
+}
+
+/* Multi-column rather than a grid: grid rows are as tall as their tallest cell,
+   so a group of one chip sitting next to a group of four leaves a hole. Columns
+   flow continuously and pack tight, and `break-inside` keeps a group whole. */
+.chips {
+  columns: 320px 2;
+  column-gap: 30px;
+  width: 100%;
+  max-width: 780px;
+}
+
+.chips.single {
+  columns: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+/* The label sits beside its chips, not above them: a heading on its own line
+   costs a row per add-in, which is most of the height this picker used. */
+.chip-group {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 10px;
+  break-inside: avoid;
+  margin-bottom: 9px;
+}
+
+.chips.single .chip-group { display: contents; }
+
+.chip-label {
+  text-align: right;
+  /* Optical, not geometric: lines the cap height up with the chip text rather
+     than the top of the 28px box. */
+  padding-top: 6px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.chip {
+  font: inherit;
+  font-size: 12.5px;
+  height: 28px;
+  padding: 0 10px;
+  color: var(--fg-2);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-chip);
+  cursor: pointer;
+  transition: background-color 150ms var(--ease), color 150ms var(--ease),
+              border-color 150ms var(--ease), transform 160ms ease-out;
+}
+
+.chip:active { transform: scale(0.96); }
+.chip:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+
+/* Selected is inverted rather than tinted: at this size a background wash is
+   too weak to find at a glance among a dozen siblings. */
+.chip[aria-pressed="true"] {
+  color: var(--bg);
+  background: var(--fg);
+  border-color: var(--fg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chip:not([aria-pressed="true"]):hover { background: var(--panel); color: var(--fg); }
+}
+
+/* --- Composer ----------------------------------------------------------- */
+
+.composer {
+  width: 100%;
+  max-width: 780px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--bg);
+}
+
+.composer .row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field.grow { flex: 1; }
+
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.composer input[type="text"] {
+  font: inherit;
+  font-size: 14px;
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 0 11px;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-item);
+  transition: border-color 150ms var(--ease);
+}
+
+.composer .row:first-child .field { flex: 1; }
+.composer input[type="text"]:focus { outline: none; border-color: var(--fg); }
+
+/* In the field's own label, right-aligned, rather than a loose line under the
+   input where it read as an error message with nothing to do with the field.
+   The reserved width keeps the button beside it from moving on every keystroke. */
+.fit {
+  margin-left: auto;
+  min-width: 10em;
+  text-align: right;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--fg-3);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.fit[data-over="true"] { color: var(--warn); }
+.fit + .mini { margin-left: 12px; }
+
+.segmented.sm { padding: 2px; }
+.segmented.sm .seg { height: 26px; padding: 0 9px; font-size: 12px; border-radius: 6px; }
+
+/* A native range, restyled only where the defaults clash with the page. */
+.composer input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  margin: 0;
+  accent-color: var(--fg);
+  cursor: pointer;
+}
+
+.composer input[type="range"]:disabled { opacity: 0.35; cursor: not-allowed; }
+
+#c-icon-name { text-transform: none; letter-spacing: 0; }
+
+#c-icon-name[href] {
+  color: var(--fg-2);
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 2px;
+  transition: color 150ms var(--ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #c-icon-name[href]:hover { color: var(--fg); }
+}
+
+.credit {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--fg-3);
+}
+
+.credit a { text-underline-offset: 2px; }
+
+.mini {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-left: auto;
+  padding: 0;
+  color: var(--fg-2);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color 150ms var(--ease);
+}
+
+.mini:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+
+/* Nothing to undo yet: the button stays in place and says so, rather than
+   disappearing and moving the row around. */
+.mini:disabled { opacity: 0.35; cursor: default; }
+.mini:active { transform: scale(0.96); }
+.mini { transition: color 150ms var(--ease), transform 160ms ease-out; }
+
+/* Drawn rather than an emoji, so it takes the label's colour in both themes.
+   1.4px stroke against 11px uppercase text. */
+.mini .pop { flex: none; }
+
+.dot-sep { color: var(--line-strong); }
+
+@media (hover: hover) and (pointer: fine) {
+  .mini:hover { color: var(--fg); }
+}
+
+/* Exactly five rows, then scroll: enough that the grid reads as a library rather
+   than a strip, without the picker owning half the page. Rows are pinned to
+   38px so the height is five rows whatever the column count works out to. */
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+  grid-auto-rows: 38px;
+  gap: 6px;
+  height: calc(5 * 38px + 4 * 6px + 16px);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-item);
+  background: var(--panel);
+}
+
+.icon-cell {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: var(--screen);
+  border: 1px solid transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: border-color 150ms var(--ease), transform 160ms ease-out;
+}
+
+.icon-cell canvas {
+  width: 24px;
+  height: 24px;
+  image-rendering: pixelated;
+}
+
+.icon-cell:active { transform: scale(0.96); }
+.icon-cell[aria-selected="true"] { border-color: var(--fg); }
+.icon-cell:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .icon-cell:hover { border-color: var(--line-strong); }
+}
+
+/* --- Detail ------------------------------------------------------------- */
+
+.detail {
+  margin: 28px 0 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 22px;
+  background: var(--bg);
+  transition: opacity 150ms var(--ease);
+}
+
+.detail[data-swapping="true"] { opacity: 0; }
+
+.detail-head h2 { font-size: 19px; }
+.detail-head p { font-size: 13px; margin-top: 2px; }
+.note { margin-top: 12px; color: var(--fg-2); max-width: 68ch; min-height: 46px; }
+
+.codes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+/* Each block is as tall as it needs to be. The two in a row match because the
+   grid stretches them to the taller one, so the pair always lines up without
+   anything being pinned to a fixed size. */
+.code-block {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--r-item);
+  overflow: hidden;
+  background: var(--panel);
+  min-width: 0;
+}
+
+.code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 8px 7px 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--fg-3);
+}
+
+.copy {
+  font: inherit;
+  font-size: 12px;
+  color: var(--fg-2);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: background-color 150ms var(--ease), color 150ms var(--ease),
+              transform 160ms ease-out;
+}
+
+.copy:active { transform: scale(0.96); }
+.copy:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .copy:hover { background: var(--panel-2); color: var(--fg); }
+}
+
+/* Wrapping is visual only: Copy takes the text content, so a wrapped command
+   still pastes as one line. */
+pre {
+  margin: 0;
+  padding: 12px;
+  flex: 1;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 20px;
+  color: var(--fg-2);
+  tab-size: 2;
+}
+
+.file { margin-top: 16px; font-size: 13px; }
+.file code { font-family: var(--mono); font-size: 12.5px; }
+.file a { text-decoration-color: var(--line-strong); text-underline-offset: 2px; }
+
+/* --- Disclaimer --------------------------------------------------------- */
+
+.disclaimer {
+  margin-top: 56px;
+  border-top: 1px solid var(--line);
+  padding: 40px 0 64px;
+}
+
+.disclaimer h2 { font-size: 15px; }
+
+/* Full width, but in columns: a 1000px measure is not a readable line length. */
+.disclaimer-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 22px;
+  margin-top: 16px;
+}
+
+.disclaimer p { color: var(--fg-3); font-size: 13.5px; }
+.disclaimer strong { color: var(--fg-2); font-weight: 560; }
+
+/* --- Footer ------------------------------------------------------------- */
+
+.bottom { border-top: 1px solid var(--line); background: var(--panel); }
+
+.bottom-inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  padding-top: 22px;
+  padding-bottom: 22px;
+  font-size: 13px;
+}
+
+.bottom-inner > :last-child { text-align: right; }
+.bottom-inner [data-icon="logo"] { display: inline-flex; align-items: center; gap: 9px; }
+.bottom-inner a { text-underline-offset: 2px; }
+.gh-btn.ghost { background: transparent; border-color: transparent; padding: 0 4px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .gh-btn.ghost:hover { background: transparent; color: var(--fg); }
+}
+
+@media (max-width: 680px) {
+  .bottom-inner { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .bottom-inner > :last-child { text-align: center; }
+  .intro { padding-top: 48px; }
+  .intro h1 { font-size: 26px; }
+
+  /* Side by side, three controls and a slider do not fit in 340px. Stacking is
+     the only honest answer; squeezing them just moves the problem. */
+  .composer .row { flex-direction: column; align-items: stretch; gap: 14px; }
+  .composer .field, .composer .field.grow { width: 100%; }
+
+  /* The label gutter costs a quarter of the width here, and "Uptime Kuma" wraps
+     inside it. Above its chips it costs a line and reads straight. */
+  .chip-group { grid-template-columns: minmax(0, 1fr); gap: 5px; margin-bottom: 14px; }
+  .chip-label { text-align: left; padding-top: 0; }
+}
+
+/* At 320px the wordmark, both buttons and the page gutters no longer fit on one
+   line. The GitHub mark says the same thing as its label. */
+/* Four route tabs total 358px of label, which is exactly a phone's content
+   width -- so they wrapped, leaving Custom alone on a second line. Tightening
+   the padding buys the 32px that keeps them on one row. */
+@media (max-width: 460px) {
+  .seg { padding: 0 8px; }
+}
+
+@media (max-width: 400px) {
+  .wrap { padding: 0 16px; }
+  .gh-label { display: none; }
+  .gh-btn { padding: 0 9px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 1ms !important; }
+}

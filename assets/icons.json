@@ -1,0 +1,32 @@
+{
+  "_comment": [
+    "Sources for the 8x8 icons. The graphics are not stored in this repository.",
+    "Third parties uploaded them to the LaMetric community library, and some are",
+    "brand logos. Shipping them under this project's license would make a license",
+    "claim that this project cannot support.",
+    "scripts/fetch-icons.py downloads them by ID and applies the transformations.",
+    "Source for each icon: https://developer.lametric.com/icons -> ID",
+    "",
+    "Operations: 'tint' recolors the silhouette through the alpha channel,",
+    "'colorize' recolors every pixel while preserving transparency,",
+    "'ramp' maps the existing shading onto a black -> color gradient,",
+    "'hue' rotates the color wheel and 'saturate' boosts it (ImageMagick",
+    "-modulate, 100 = unchanged), and",
+    "'replace' swaps one specific color for another."
+  ],
+  "codex":         {"id": 74678, "title": "codex"},
+  "codex_low":     {"id": 74678, "hue": 170, "title": "codex"},
+  "claude":        {"id": 71678, "title": "claude-logo"},
+  "plex":          {"id": 55441, "title": "Plex #1055 Clean"},
+  "plex_down":     {"id": 55441, "ramp": "#FF2020"},
+  "git":           {"id": 66192, "tint": "#FFFFFF", "title": "github success"},
+  "git_fail":      {"id": 66092, "title": "github error"},
+  "git_ok":        {"id": 66192, "title": "github success"},
+  "kuma":          {"id": 72781, "title": "Uptime-Kuma"},
+  "kuma_down":     {"id": 72781, "hue": 22, "saturate": 200},
+  "hass":          {"id": 55421, "title": "Home Assistant New"},
+  "psn":           {"id": 18335, "title": "PlayStation"},
+  "psn_warn":      {"id": 18335, "replace": {"from": "#1A26CB", "to": "#B08000", "fuzz": "45%"}},
+  "psn_fail":      {"id": 18335, "replace": {"from": "#1A26CB", "to": "#B00000", "fuzz": "45%"}},
+  "clock_default": {"id": 59845, "ext": "gif", "colorize": "#FFFFFF", "title": "code"}
+}
