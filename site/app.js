@@ -12,8 +12,10 @@ const W = 37;              // display width in pixels
 const H = 8;               // display height in pixels
 const ICON = 8;            // the left colour zone
 const TEXT_X = 9;          // text starts one pixel clear of the icon zone
-const GAP = 0.16;          // share of a cell left dark, so the LEDs read as dots
-const BAR_TRACK = '#4a4a4a';  // the unfilled part of a progress bar, measured off the panel
+const GAP = 0.16;          // dark share of a cell, measured on the dim part of a bar
+const GAP_LIT = 0.03;      // a lit LED fills its cell up to a seam
+const LED_WHITE = '#f6f2e8';  // white on the panel is warm, not paper white
+const BAR_TRACK = '#37352f';  // the unfilled part of a bar, dim but lit
 
 // Undocumented on the device, so these are tuned by eye rather than measured.
 const HOLD_MS = 2200;      // a frame that fits stays this long
@@ -106,35 +108,29 @@ function iconFrame(icon, t) {
   return i;
 }
 
-/** One LED, plus the spill a bright one has on the real panel.
+/** One LED, at the size the panel gives it.
  *
- * The cell geometry is not in question: on a photograph of the device the
- * dimly lit part of a progress bar leaves a third of each cell dark, which is
- * GAP. The brightly lit part of the same row, same optics, leaves a tenth --
- * a bright LED washes through the diffuser into its own gap until only a seam
- * is left between neighbours. So the square stays the measured size and the
- * spill is drawn on top of it, scaled by `glow` because a dim LED barely has
- * any.
+ * Measured on a photograph of the device, in one row of a progress bar so that
+ * nothing differs but brightness: the dim part of the track leaves a third of
+ * each cell dark, the lit part leaves a tenth. A bright LED washes through the
+ * diffuser and fills its cell up to a seam, and it does that as a flat, solid
+ * square -- on the device the lit cells look fuller, not brighter. So `glow`
+ * grows the square between those two measurements instead of lighting a halo,
+ * and the faint one that is left only carries the sense of light coming off it.
  */
 function led(x, y, size, color, lit, glow = 1) {
-  const pad = size * GAP;
-  const s = size - pad * 2;
-  const px = x * size + pad;
-  const py = y * size + pad;
-  const r = Math.max(1, s * 0.22);
+  const gap = size * (lit ? GAP - (GAP - GAP_LIT) * glow : GAP);
+  const s = size - gap * 2;
+  const px = x * size + gap;
+  const py = y * size + gap;
+  const r = Math.max(1, s * 0.2);
 
   if (lit && glow) {
+    const halo = size * 0.14;
+    ctx.globalAlpha = 0.08 * glow;
     ctx.fillStyle = color;
-    // Opaque enough to read as lit, out to the seam the panel leaves.
-    const spill = pad * 0.7;
-    ctx.globalAlpha = 0.62 * glow;
     ctx.beginPath();
-    ctx.roundRect(px - spill, py - spill, s + spill * 2, s + spill * 2, r * 1.6);
-    ctx.fill();
-    // And a wider, fainter halo, which is what the eye reads as brightness.
-    ctx.globalAlpha = 0.14 * glow;
-    ctx.beginPath();
-    ctx.roundRect(px - pad * 1.9, py - pad * 1.9, s + pad * 3.8, s + pad * 3.8, r * 3);
+    ctx.roundRect(px - halo, py - halo, s + halo * 2, s + halo * 2, r * 2);
     ctx.fill();
     ctx.globalAlpha = 1;
   }
@@ -184,7 +180,7 @@ function drawText(text, size, offset, zoneX, zoneW) {
       if (!grid[gy][gx]) continue;
       const x = zoneX + gx - offset;
       if (x < zoneX || x >= zoneX + zoneW) continue;   // clipped by the zone
-      led(x, gy + 1, size, '#ffffff', true);
+      led(x, gy + 1, size, LED_WHITE, true);
     }
   }
 }
@@ -197,7 +193,7 @@ function drawBar(goal, size, zoneX, zoneW) {
   const lit = Math.round(span * zoneW);
   for (let i = 0; i < zoneW; i++) {
     const on = i < lit;
-    led(zoneX + i, H - 1, size, on ? '#ffffff' : BAR_TRACK, true, on ? 1 : 0.3);
+    led(zoneX + i, H - 1, size, on ? LED_WHITE : BAR_TRACK, true, on ? 1 : 0.75);
   }
 }
 
