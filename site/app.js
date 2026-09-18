@@ -13,6 +13,7 @@ const H = 8;               // display height in pixels
 const ICON = 8;            // the left colour zone
 const TEXT_X = 9;          // text starts one pixel clear of the icon zone
 const GAP = 0.16;          // share of a cell left dark, so the LEDs read as dots
+const BAR_TRACK = '#4a4a4a';  // the unfilled part of a progress bar, measured off the panel
 
 // Undocumented on the device, so these are tuned by eye rather than measured.
 const HOLD_MS = 2200;      // a frame that fits stays this long
@@ -172,11 +173,15 @@ function drawText(text, size, offset, zoneX, zoneW) {
   }
 }
 
-/** The device draws goalData along the bottom row when it also has text. */
+/** The device draws goalData along the bottom row when it also has text. The
+    part still to go is not dark: it stays lit at roughly a quarter brightness,
+    so the bar reads as a track rather than as a growing stub. */
 function drawBar(goal, size, zoneX, zoneW) {
   const span = Math.max(0, Math.min(1, (goal.current - goal.start) / (goal.end - goal.start)));
   const lit = Math.round(span * zoneW);
-  for (let i = 0; i < lit; i++) led(zoneX + i, H - 1, size, '#ffffff', true);
+  for (let i = 0; i < zoneW; i++) {
+    led(zoneX + i, H - 1, size, i < lit ? '#ffffff' : BAR_TRACK, true);
+  }
 }
 
 /* --- The loop ------------------------------------------------------------ */

@@ -12,12 +12,28 @@ These findings were verified on a pre-2022 **LaMetric Time LM 37X8** running fir
 | `goalData` progress bars | yes | yes |
 | `text` plus `goalData` | yes, with an empty `unit` | yes |
 | `chartData` spike charts | yes | yes |
-| Scrolling text beyond 29 pixels | yes | yes |
+| Scrolling text beyond 28 pixels | yes | yes |
 | Built-in sound and MP3 by URL | yes | no |
 | Persistent display | `cycles: 0` or `lifeTime` | yes |
 
 The left 8×8 pixels are full RGB. The remaining 29×8 area renders text and data in
 white.
+
+## Display layout
+
+Read off photographs of the panel, LED by LED. These are what
+[`site/font.js`](../site/font.js) reproduces:
+
+- **Column 8 stays dark** next to the icon. Text and progress bars use columns 9-36,
+  so the usable width is 28 pixels, and text past that scrolls.
+- **Text is centred** in those 28 columns, rounding the left margin down, and sits on
+  rows 1-5. Row 0 and row 6 stay dark.
+- **There is no lowercase.** Mixed-case text renders as capitals.
+- **Glyphs are 3×5** with one dark column between them, except `N` (4 wide), `M` and
+  `W` (5), and `I` (1). A space is 2 wide.
+- **A `goalData` bar** occupies row 7 across the same 28 columns, `round(fraction ×
+  28)` lit. The rest of the track is not dark, it stays lit at about a quarter
+  brightness.
 
 ## Known limits
 

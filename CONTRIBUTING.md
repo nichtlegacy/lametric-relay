@@ -43,8 +43,9 @@ work from there. A complete contribution is:
       and a `dict(...)` to `scenarios()`. The frames come from running your code, so
       there is nothing to keep in sync.
 
-Text is worth thinking about. The display is 37 × 8 pixels: an 8 × 8 icon and 29 × 8 of
-text, which is roughly nine characters before it starts scrolling. The **Custom** tab on
+Text is worth thinking about. The display is 37 × 8 pixels: an 8 × 8 icon and 28 usable
+columns of text, which is about seven capitals before it starts scrolling. The device
+has no lowercase, so whatever you send comes out in capitals. The **Custom** tab on
 the preview site counts the pixels for you.
 
 ## Running the checks

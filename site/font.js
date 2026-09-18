@@ -1,85 +1,66 @@
-// A 5x8 pixel font for the 29x8 text zone of a LaMetric Time.
+// The 3x5 caps font of a LaMetric Time, for the 28x8 text zone next to an icon.
 //
-// This is a reproduction, not the device ROM font: LaMetric ships no font file
-// and the SDK contains only Qt headers, so the glyphs below were drawn to match
-// the proportions of a real LM 37X8 rather than copied from it. Line lengths and
-// wrapping behaviour are therefore close, not exact.
+// Traced off photographs of a real LM 37X8: the glyphs marked below were read
+// LED by LED from the panel, the rest are drawn in the same style because no
+// frame captured them. LaMetric ships no font file, so this stays a
+// reproduction, but the metrics it is measured on are exact.
+//
+// What the photographs settle:
+//   - the device has no lowercase. "One Piece" comes off the wire mixed case
+//     and renders ONE PIECE, so glyph() folds case rather than inventing it.
+//   - caps are 3 wide, 5 rows tall, with one dark column between them. N is 4
+//     wide, I is 1.
+//   - a space is 2 wide.
+//   - text sits on display rows 1-5, clear of the progress bar on row 7.
 //
 // Each glyph is an array of rows, '#' lit and '.' dark, drawn from glyph row 0.
-// Rows 0-4 are cap height, rows 1-4 are x-height, row 5 is the descender. The
-// renderer draws glyph row 0 at display row 1, so text sits on rows 1-6 of 8 and
-// a descender still fits.
+// The renderer draws glyph row 0 at display row 1, so a comma still has a row
+// below the baseline to hang in.
 
 export const GLYPH_ROWS = 6;
 export const LETTER_SPACING = 1;
 
+// Glyphs read off the panel are marked; the others match their style.
 const RAW = {
-  ' ': ['..'],
+  ' ': ['..'],                                            // measured
 
-  A: ['.##.', '#..#', '####', '#..#', '#..#'],
-  B: ['###.', '#..#', '###.', '#..#', '###.'],
-  C: ['.##.', '#..#', '#...', '#..#', '.##.'],
-  D: ['###.', '#..#', '#..#', '#..#', '###.'],
-  E: ['####', '#...', '###.', '#...', '####'],
-  F: ['####', '#...', '###.', '#...', '#...'],
-  G: ['.##.', '#...', '#.##', '#..#', '.###'],
-  H: ['#..#', '#..#', '####', '#..#', '#..#'],
-  I: ['###', '.#.', '.#.', '.#.', '###'],
-  J: ['..##', '...#', '...#', '#..#', '.##.'],
-  K: ['#..#', '#.#.', '##..', '#.#.', '#..#'],
-  L: ['#...', '#...', '#...', '#...', '####'],
+  A: ['##.', '#.#', '###', '#.#', '#.#'],                 // measured
+  B: ['##.', '#.#', '##.', '#.#', '##.'],
+  C: ['.##', '#..', '#..', '#..', '.##'],                 // measured
+  D: ['##.', '#.#', '#.#', '#.#', '##.'],                 // measured
+  E: ['###', '#..', '###', '#..', '###'],                 // measured
+  F: ['###', '#..', '###', '#..', '#..'],
+  G: ['.##', '#..', '#.#', '#.#', '.##'],                 // measured
+  H: ['#.#', '#.#', '###', '#.#', '#.#'],                 // measured
+  I: ['#', '#', '#', '#', '#'],                           // measured, 1 wide
+  J: ['..#', '..#', '..#', '#.#', '.#.'],
+  K: ['#.#', '#.#', '##.', '#.#', '#.#'],
+  L: ['#..', '#..', '#..', '#..', '###'],
   M: ['#...#', '##.##', '#.#.#', '#...#', '#...#'],
-  N: ['#..#', '##.#', '#.##', '#..#', '#..#'],
-  O: ['.##.', '#..#', '#..#', '#..#', '.##.'],
-  P: ['###.', '#..#', '###.', '#...', '#...'],
-  Q: ['.##.', '#..#', '#..#', '#.#.', '.#.#'],
-  R: ['###.', '#..#', '###.', '#.#.', '#..#'],
-  S: ['.###', '#...', '.##.', '...#', '###.'],
-  T: ['#####', '..#..', '..#..', '..#..', '..#..'],
-  U: ['#..#', '#..#', '#..#', '#..#', '.##.'],
-  V: ['#...#', '#...#', '#...#', '.#.#.', '..#..'],
-  W: ['#...#', '#...#', '#.#.#', '##.##', '#...#'],
-  X: ['#...#', '.#.#.', '..#..', '.#.#.', '#...#'],
-  Y: ['#...#', '.#.#.', '..#..', '..#..', '..#..'],
-  Z: ['####', '...#', '.##.', '#...', '####'],
-
-  a: ['...', '##.', '..#', '###', '.##'],
-  b: ['#..', '#..', '##.', '#.#', '##.'],
-  c: ['...', '.##', '#..', '#..', '.##'],
-  d: ['..#', '..#', '.##', '#.#', '.##'],
-  e: ['...', '.#.', '###', '#..', '.##'],
-  f: ['.##', '#..', '##.', '#..', '#..'],
-  g: ['...', '.##', '#.#', '.##', '..#', '##.'],
-  h: ['#..', '#..', '##.', '#.#', '#.#'],
-  i: ['#', '.', '#', '#', '#'],
-  j: ['.#', '..', '.#', '.#', '.#', '##'],
-  k: ['#..', '#.#', '##.', '#.#', '#.#'],
-  l: ['#', '#', '#', '#', '#'],
-  m: ['.....', '#####', '#.#.#', '#.#.#', '#.#.#'],
-  n: ['...', '##.', '#.#', '#.#', '#.#'],
-  o: ['...', '.#.', '#.#', '#.#', '.#.'],
-  p: ['...', '##.', '#.#', '##.', '#..', '#..'],
-  q: ['...', '.##', '#.#', '.##', '..#', '..#'],
-  r: ['...', '.##', '#..', '#..', '#..'],
-  s: ['...', '.##', '#..', '..#', '##.'],
-  t: ['.#.', '###', '.#.', '.#.', '..#'],
-  u: ['...', '#.#', '#.#', '#.#', '.##'],
-  v: ['...', '#.#', '#.#', '#.#', '.#.'],
-  w: ['.....', '#.#.#', '#.#.#', '#.#.#', '.#.#.'],
-  x: ['...', '#.#', '.#.', '.#.', '#.#'],
-  y: ['...', '#.#', '#.#', '.##', '..#', '##.'],
-  z: ['...', '###', '..#', '#..', '###'],
+  N: ['#..#', '##.#', '#.##', '#..#', '#..#'],            // measured, 4 wide
+  O: ['.#.', '#.#', '#.#', '#.#', '.#.'],                 // measured
+  P: ['###', '#.#', '##.', '#..', '#..'],                 // measured
+  Q: ['.#.', '#.#', '#.#', '#.#', '.##'],
+  R: ['###', '#.#', '##.', '#.#', '#.#'],                 // measured
+  S: ['.##', '#..', '.#.', '..#', '##.'],
+  T: ['###', '.#.', '.#.', '.#.', '.#.'],                 // measured
+  U: ['#.#', '#.#', '#.#', '#.#', '.#.'],
+  V: ['#.#', '#.#', '#.#', '.#.', '.#.'],
+  W: ['#...#', '#...#', '#.#.#', '#.#.#', '.#.#.'],
+  X: ['#.#', '#.#', '.#.', '#.#', '#.#'],
+  Y: ['#.#', '#.#', '.#.', '.#.', '.#.'],
+  Z: ['###', '..#', '.#.', '#..', '###'],
 
   0: ['###', '#.#', '#.#', '#.#', '###'],
-  1: ['.#.', '##.', '.#.', '.#.', '###'],
+  1: ['.#.', '##.', '.#.', '.#.', '###'],   // measured
   2: ['###', '..#', '###', '#..', '###'],
-  3: ['###', '..#', '.##', '..#', '###'],
-  4: ['#.#', '#.#', '###', '..#', '..#'],
-  5: ['###', '#..', '###', '..#', '###'],
-  6: ['###', '#..', '###', '#.#', '###'],
-  7: ['###', '..#', '..#', '..#', '..#'],
+  3: ['###', '..#', '###', '..#', '###'],   // measured
+  4: ['#.#', '#.#', '###', '..#', '..#'],   // measured
+  5: ['###', '#..', '###', '..#', '###'],   // measured
+  6: ['###', '#..', '###', '#.#', '###'],   // measured
+  7: ['###', '..#', '..#', '..#', '..#'],   // measured
   8: ['###', '#.#', '###', '#.#', '###'],
-  9: ['###', '#.#', '###', '..#', '###'],
+  9: ['###', '#.#', '###', '..#', '###'],   // measured
 
   '.': ['.', '.', '.', '.', '#'],
   ',': ['.', '.', '.', '.', '#', '#'],
@@ -87,7 +68,7 @@ const RAW = {
   ';': ['.', '#', '.', '#', '.', '#'],
   '!': ['#', '#', '#', '.', '#'],
   '?': ['##.', '..#', '.#.', '...', '.#.'],
-  '%': ['#.#', '..#', '.#.', '#..', '#.#'],
+  '%': ['#.#', '..#', '.#.', '#..', '#.#'],             // measured
   '+': ['...', '.#.', '###', '.#.', '...'],
   '-': ['...', '...', '###', '...', '...'],
   '/': ['..#', '..#', '.#.', '#..', '#..'],
@@ -112,13 +93,13 @@ const RAW = {
   '|': ['#', '#', '#', '#', '#'],
 };
 
-// Fold accented characters onto their base glyph. The device renders them
-// properly; the point here is that a name with an umlaut stays readable
-// instead of turning into a row of unknown boxes.
+// Fold accented characters and typographic punctuation onto a base glyph, so a
+// name with an umlaut stays readable instead of turning into a row of boxes.
+// Everything else is folded by case: the device has no lowercase.
 const FOLD = {
-  ä: 'a', ö: 'o', ü: 'u', Ä: 'A', Ö: 'O', Ü: 'U', ß: 'B',
-  á: 'a', à: 'a', â: 'a', é: 'e', è: 'e', ê: 'e', í: 'i', ì: 'i',
-  ó: 'o', ò: 'o', ô: 'o', ú: 'u', ù: 'u', ñ: 'n', ç: 'c', å: 'a', ø: 'o',
+  ä: 'A', ö: 'O', ü: 'U', Ä: 'A', Ö: 'O', Ü: 'U', ß: 'B',
+  á: 'A', à: 'A', â: 'A', é: 'E', è: 'E', ê: 'E', í: 'I', ì: 'I',
+  ó: 'O', ò: 'O', ô: 'O', ú: 'U', ù: 'U', ñ: 'N', ç: 'C', å: 'A', ø: 'O',
   '–': '-', '—': '-', '’': "'", '‘': "'", '“': '"', '”': '"', '…': '.',
 };
 
@@ -128,7 +109,7 @@ const UNKNOWN = ['###', '#.#', '#.#', '#.#', '###'];
 
 /** Return {width, rows} for one character, where rows are '#'/'.' strings. */
 export function glyph(ch) {
-  const rows = RAW[ch] || RAW[FOLD[ch]] || UNKNOWN;
+  const rows = RAW[FOLD[ch] ?? ch.toUpperCase()] || UNKNOWN;
   return { width: rows[0].length, rows };
 }
 
