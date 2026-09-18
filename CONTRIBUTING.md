@@ -38,7 +38,7 @@ work from there. A complete contribution is:
       real payload and check the frame that comes out. Include the quiet cases: the
       heartbeat that should produce nothing is as important as the event that should.
 - [ ] **A scenario** in [`scripts/build-preview.py`](scripts/build-preview.py) so your
-      add-in appears on the [preview site](https://nichtlegacy.github.io/lametric-relay/).
+      add-in appears on the [preview site](https://lametric.nichtlegacy.com/).
       Add a line to `GROUPS` for the display name, one to `SHORT` for the chip label,
       and a `dict(...)` to `scenarios()`. The frames come from running your code, so
       there is nothing to keep in sync.

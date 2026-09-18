@@ -9,9 +9,9 @@
 <img alt="Docker ready" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
 <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-22C55E"></a>
 
-[Live preview](https://nichtlegacy.github.io/lametric-relay/) · [Quick start](#quick-start) · [Add-ins](#add-ins) · [Documentation](#documentation)
+[Live preview](https://lametric.nichtlegacy.com/) · [Quick start](#quick-start) · [Add-ins](#add-ins) · [Documentation](#documentation)
 
-<img src="docs/assets/hero.gif" width="820" alt="A simulated LaMetric Time cycling through a Plex episode, a failed Forgejo build, an Uptime Kuma monitor going down, a PlayStation game start, a Codex quota bar and a Claude quota warning">
+<a href="https://lametric.nichtlegacy.com/"><img src="docs/assets/hero.gif" width="820" alt="A simulated LaMetric Time cycling through a Plex episode, a failed Forgejo build, an Uptime Kuma monitor going down, a PlayStation game start, a Codex quota bar and a Claude quota warning"></a>
 
 </div>
 
@@ -26,12 +26,12 @@ notifications, live data as DIY widgets and optional ambient context on the cloc
 
 ## Live preview
 
-**[nichtlegacy.github.io/lametric-relay](https://nichtlegacy.github.io/lametric-relay/)**
+**[lametric.nichtlegacy.com](https://lametric.nichtlegacy.com/)**
 is the display in a browser. Pick a source to see what the clock would do, switch quiet
 hours on to see what the hub drops, or compose a frame of your own.
 
 <p align="center">
-  <a href="https://nichtlegacy.github.io/lametric-relay/"><img src="docs/assets/preview-dark.png" width="640" alt="The preview site: a simulated display above a picker of every scenario the add-ins produce"></a>
+  <a href="https://lametric.nichtlegacy.com/"><img src="docs/assets/preview-dark.png" width="640" alt="The preview site: a simulated display above a picker of every scenario the add-ins produce"></a>
 </p>
 
 ## Quick start
