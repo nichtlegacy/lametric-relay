@@ -34,6 +34,11 @@ Read off photographs of the panel, LED by LED. These are what
 - **A `goalData` bar** occupies row 7 across the same 28 columns, `round(fraction ×
   28)` lit. The rest of the track is not dark, it stays lit at about a quarter
   brightness.
+- **An LED fills about 68% of its cell**, measured on the dim part of that track,
+  where nothing is overexposed. The bright part of the same row measures 90%: a
+  lit LED washes through the diffuser into its own gap until only a seam is left
+  between neighbours, which is why a photograph of the panel looks denser than
+  the geometry is.
 
 ## Known limits
 
